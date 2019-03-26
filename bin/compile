@@ -4,7 +4,8 @@ set -x
 set -e
 
 echo "-----> Installing Xvfb"
-apt install xvfb
+apt -y update
+apt -y install xvfb
 
 echo "-----> Compiling zipper files"
 cd $1/zipper
