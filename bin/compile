@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -x
+set -e
+
+echo "-----> Installing Xvfb"
+apt install xvfb
+
+echo "-----> Compiling zipper files"
+cd $1/zipper
+yarn
+yarn build:chrome
+
+echo "-----> Creating zipper extension"
+xvfb-run /opt/google/chrome/chrome --no-sandbox --pack-extension=extension --pack-extension-key=zipper.pem
+test -f extension.crx
