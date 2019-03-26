@@ -24,6 +24,8 @@ done
 echo "-----> Compiling zipper files"
 cd $BUILD_DIR/zipper
 yarn
+
+export GIT_COMMIT_SHA1=$HEROKU_TEST_RUN_COMMIT_VERSION
 yarn build:chrome
 
 echo "-----> Creating zipper extension"
