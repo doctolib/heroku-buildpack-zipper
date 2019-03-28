@@ -16,10 +16,12 @@ mkdir -p "$APT_STATE_DIR/lists/partial"
 APT_OPTIONS="-o debug::nolocking=true -o dir::cache=$APT_CACHE_DIR -o dir::state=$APT_STATE_DIR"
 
 echo "-----> Installing Xvfb"
-apt-get $APT_OPTIONS -y --force-yes -d install --reinstall xvfb
+for package in xvfb libgl1-mesa-glx; do
+  apt-get $APT_OPTIONS -y --force-yes -d install --reinstall $package
+done
 
-for DEB in `ls -1 $APT_CACHE_DIR/archives/*.deb`; do
-  dpkg -x $DEB $BUILD_DIR/.apt/
+for deb in `ls -1 $APT_CACHE_DIR/archives/*.deb`; do
+  dpkg -x $deb $BUILD_DIR/.apt/
 done
 
 echo "-----> Compiling zipper files"
@@ -28,6 +30,17 @@ yarn
 
 export GIT_COMMIT_SHA1=$(cat ${ENV_DIR}/HEROKU_TEST_RUN_COMMIT_VERSION)
 yarn build:chrome
+
+echo "-----> Patch xvfb"
+ln -s $BUILD_DIR/.apt/usr/bin $BUILD_DIR/._b
+ln -s $BUILD_DIR/.apt/usr/share $BUILD_DIR/._sha
+
+sed -i s:/usr/bin:/app/._b: $BUILD_DIR/.apt/usr/bin/Xvfb
+sed -i s:/usr/share/X11/xkb:/app/._sha/X11/xkb: $BUILD_DIR/.apt/usr/bin/Xvfb
+sed -i s:/usr/share/X11/xkb:/app/._sha/X11/xkb: $BUILD_DIR/.apt/usr/bin/xkbcomp
+
+export PATH="$PATH:$BUILD_DIR/.apt/usr/bin"
+export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib:$LD_LIBRARY_PATH:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/mesa/:"
 
 echo "-----> Creating zipper extension"
 xvfb-run /opt/google/chrome/chrome --no-sandbox --pack-extension=extension --pack-extension-key=zipper.pem
