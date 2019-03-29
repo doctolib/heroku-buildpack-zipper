@@ -42,16 +42,17 @@ sed -i s:/usr/share/X11/xkb:/app/._sha/X11/xkb: $BUILD_DIR/.apt/usr/bin/xkbcomp
 export PATH="$PATH:$BUILD_DIR/.apt/usr/bin"
 export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib:$LD_LIBRARY_PATH:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/mesa/:"
 
-echo "-----> Start Xvfb"
-Xvfb :42
-export DISPLAY=:42
-
 echo "-----> Create .profile.d script"
 mkdir -p $BUILD_DIR/.profile.d
-echo "export DISPLAY=:42" > $BUILD_DIR/.profile.d/000_display.sh
+cat <<EOF > $BUILD_DIR/.profile.d/010_display.sh
+export LD_LIBRARY_PATH="\$BUILD_DIR/.apt/usr/lib:\$LD_LIBRARY_PATH:\$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/:\$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/mesa/:"
+
+Xvfb -noreset :42 &
+export DISPLAY=:42
+EOF
 chmod +x $BUILD_DIR/.profile.d
 
 echo "-----> Creating zipper extension"
 rm -f extension.crx
-$BUILD_DIR/.apt/opt/google/chrome/chrome --no-sandbox --disable-gpu --pack-extension=extension --pack-extension-key=zipper.pem
+xvfb-run $BUILD_DIR/.apt/opt/google/chrome/chrome --no-sandbox --disable-gpu --pack-extension=extension --pack-extension-key=zipper.pem
 test -f extension.crx
