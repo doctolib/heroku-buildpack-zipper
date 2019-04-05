@@ -7,11 +7,6 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 
-echo "-----> Compiling zipper files"
-cd $BUILD_DIR/zipper
-export GIT_COMMIT_SHA1=$(cat ${ENV_DIR}/HEROKU_TEST_RUN_COMMIT_VERSION)
-yarn build:chrome
-
 echo "-----> Patch xvfb"
 ln -s $BUILD_DIR/.apt/usr/bin $BUILD_DIR/._b
 ln -s $BUILD_DIR/.apt/usr/share $BUILD_DIR/._sha
@@ -30,6 +25,13 @@ export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib:$BUILD_DIR/.apt/usr/lib/x86_64-l
 exec $BUILD_DIR/.apt/usr/bin/xvfb-run "\$@"
 EOF
 chmod +x $BUILD_DIR/.apt/usr/bin/xvfb-stub
+
+[[ "${CI_NODE_INDEX:-0}" != 0 ]] && exit 0
+
+echo "-----> Compiling zipper files"
+cd $BUILD_DIR/zipper
+export GIT_COMMIT_SHA1=$(cat ${ENV_DIR}/HEROKU_TEST_RUN_COMMIT_VERSION)
+yarn build:chrome
 
 echo "-----> Creating zipper extension"
 rm -f extension.crx

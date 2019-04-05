@@ -5,10 +5,5 @@ if [ ! -d $1/zipper ]; then
   exit 1
 fi
 
-if [[ "${CI_NODE_INDEX:-0}" = 0 ]]; then
-  echo "-----> Zipper is not enabled on this node."
-  exit 1
-fi
-
 echo "-----> Enabled Zipper building"
-exit 1
+exit 0
