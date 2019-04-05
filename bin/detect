@@ -5,7 +5,7 @@ if [ ! -d $1/zipper ]; then
   exit 1
 fi
 
-if [[ "${CI_NODE_INDEX}" = 0 ]]; then
+if [[ "${CI_NODE_INDEX:-0}" = 0 ]]; then
   echo "-----> Zipper is not enabled on this node."
   exit 1
 fi
