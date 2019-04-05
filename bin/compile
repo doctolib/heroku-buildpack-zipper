@@ -26,6 +26,7 @@ exec $BUILD_DIR/.apt/usr/bin/xvfb-run "\$@"
 EOF
 chmod +x $BUILD_DIR/.apt/usr/bin/xvfb-stub
 
+CI_NODE_INDEX=$(cat 2>/dev/null ${ENV_DIR}/CI_NODE_INDEX)
 [[ "${CI_NODE_INDEX:-0}" != 0 ]] && exit 0
 
 echo "-----> Compiling zipper files"
