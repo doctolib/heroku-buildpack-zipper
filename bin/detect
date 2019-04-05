@@ -1,8 +1,14 @@
 #!/bin/sh
 
-if [ -d $1/zipper ]; then
-  echo "-----> Detected zipper project"
-  exit 0
+if [ ! -d $1/zipper ]; then
+  echo "-----> No zipper."
+  exit 1
 fi
 
+if [[ "${CI_NODE_INDEX}" = 0 ]]; then
+  echo "-----> Zipper is not enabled on this node."
+  exit 1
+fi
+
+echo "-----> Enabled Zipper building"
 exit 1

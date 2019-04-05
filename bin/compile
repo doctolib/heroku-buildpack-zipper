@@ -7,27 +7,8 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 
-# APT_CACHE_DIR="$CACHE_DIR/apt/cache"
-# APT_STATE_DIR="$CACHE_DIR/apt/state"
-
-# mkdir -p "$APT_CACHE_DIR/archives/partial"
-# mkdir -p "$APT_STATE_DIR/lists/partial"
-
-# APT_OPTIONS="-o debug::nolocking=true -o dir::cache=$APT_CACHE_DIR -o dir::state=$APT_STATE_DIR"
-
-# echo "-----> Installing Xvfb"
-# for package in xvfb libgl1-mesa-glx; do
-#   apt-get $APT_OPTIONS -y --force-yes -d install --reinstall $package
-# done
-
-# for deb in `ls -1 $APT_CACHE_DIR/archives/*.deb`; do
-#   dpkg -x $deb $BUILD_DIR/.apt/
-# done
-
 echo "-----> Compiling zipper files"
 cd $BUILD_DIR/zipper
-yarn
-
 export GIT_COMMIT_SHA1=$(cat ${ENV_DIR}/HEROKU_TEST_RUN_COMMIT_VERSION)
 yarn build:chrome
 
@@ -46,11 +27,11 @@ echo "-----> Create xvfb-stub script"
 cat <<EOF > $BUILD_DIR/.apt/usr/bin/xvfb-stub
 #!/bin/sh
 export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/mesa/:\$LD_LIBRARY_PATH"
-exec $BUILD_DIR/.apt/usr/bin/Xvfb "\$@"
+exec $BUILD_DIR/.apt/usr/bin/xvfb-run "\$@"
 EOF
 chmod +x $BUILD_DIR/.apt/usr/bin/xvfb-stub
 
 echo "-----> Creating zipper extension"
 rm -f extension.crx
-xvfb-run $BUILD_DIR/.apt/opt/google/chrome/chrome --no-sandbox --disable-gpu --pack-extension=extension --pack-extension-key=zipper.pem
+yarn package:chrome
 test -f extension.crx
